@@ -1,0 +1,184 @@
+Sub LoopAndCalculateMODERATE()
+
+'=============================================='
+ 'SETTING THE STAGE FOR OUTER LOOP - WORKSHEETS'
+'=============================================='
+
+'Declare Worksheet related Variables'
+Dim ws As Worksheet
+Dim starting_ws As Worksheet
+
+'Identify the worksheet you started on so you can return to it'
+Set starting_ws = ActiveSheet
+
+
+'====================='
+'====================='
+'OUTER LOOP BEGINS'
+'====================='
+'====================='
+
+
+For Each ws In ThisWorkbook.Worksheets
+    ws.Activate
+    ws.Columns("J:S").Clear
+    ws.Cells(1, 10).Value = "Ticker_Symbol"
+    ws.Cells(1, 11).Value = "Yearly_Price_Change"
+    ws.Cells(1, 12).Value = "Yearly_%_Change"
+    ws.Cells(1, 13).Value = "Total_Stock_Volume"
+    ws.Cells(2, 17).Value = "Greatest_%_Increase"
+    ws.Cells(3, 17).Value = "Greatest_%_Decrease"
+    ws.Cells(4, 17).Value = "Greatest_Total_Volume"
+    ws.Cells(1, 17).Value = "METRIC"
+    ws.Cells(1, 18).Value = "Ticker_Symbol"
+    ws.Cells(1, 19).Value = "Number"
+    ws.Range("J1:S1").Font.Bold = True
+    ws.Range("Q1:Q4").Font.Bold = True
+    ws.Range("M:M").NumberFormat = "#,##0_);[Red](#,##0)"
+    ws.Range("J:S").EntireColumn.AutoFit
+    ws.Range("N:P").ColumnWidth = 2
+
+'This allows us to verify that the Code is going through each Worksheet'
+'    MsgBox ActiveSheet.Name
+
+
+
+
+'===================================='
+ 'SETTING THE STAGE FOR INNER LOOP 1'
+'===================================='
+'Declaring Variables for the LOOP Logic'
+Dim L As Double
+Dim N As Double
+Dim TotalStockVolume As Double
+Dim YearOpenPrice As Double
+Dim YearClosePrice As Double
+
+'Setting Initial Values for Counter Variable N and Loop Variable L'
+L = 2
+N = 2
+
+'Identifying the Last Row with Data so the LOOP Variable L knows when to Stop'
+LastDataRow = Range("A" & Rows.Count).End(xlUp).Row
+
+'Assigning First Ticker Value in A2 to Ticker Column in J2'
+Cells(N, 10).Value = Cells(N, 1).Value
+YearOpenPrice = Cells(L, 3).Value
+TotalStockVolume = 0
+
+'====================='
+' INNER LOOP 1 BEGINS'
+'====================='
+'Telling the LOOP Variable L to LOOP from Row 2 to the Last Row with Data'
+For L = 2 To LastDataRow
+
+
+'If the Ticker Value in Column A is still the same Then'
+If Cells(L, 1).Value = Cells(N, 10).Value Then
+'Keep incrementing the Total Stock Volume'
+TotalStockVolume = TotalStockVolume + Cells(L, 7).Value
+'Keep replacing the Closing Price'
+YearClosePrice = Cells(L, 6).Value
+
+
+'If the Ticker Value has Changed, THEN'
+Else
+'FIRST Lock Down the Total Stock Volume for the just completed Ticker'
+Cells(N, 13).Value = TotalStockVolume
+'NEXT Calculate the Year Price Change'
+Cells(N, 11).Value = YearClosePrice - YearOpenPrice
+'NEXT Format the Year Price Change'
+    If Cells(N, 11).Value >= 0 Then
+    Cells(N, 11).Interior.ColorIndex = 4
+    Else
+    Cells(N, 11).Interior.ColorIndex = 3
+    End If
+'NEXT Calculate the Year Percent Change'
+If YearOpenPrice > 0 Then
+Cells(N, 12).Value = ((YearClosePrice - YearOpenPrice) / YearOpenPrice)
+Else
+Cells(N, 12).Value = 0
+End If
+'NEXT Format the Year Percent Change'
+Cells(N, 12).NumberFormat = "0.00%"
+'NEXT, Re-Initiate the Total Stock Volume for the New Ticker'
+TotalStockVolume = Cells(L, 7).Value
+'FINALLY,Re-Initiate the Year Open Price for the New Ticker'
+YearOpenPrice = Cells(L, 3).Value
+
+
+'Increment the Counter Variable N by 1'
+N = N + 1
+
+'Set the Ticker on the Next Row in Column J to be equal to the Tiicker on teh Current Row in Column A'
+Cells(N, 10).Value = Cells(L, 1).Value
+
+End If
+
+'Repeat this Inner LOOP until we reach the Last Row with Data on the existing worksheet'
+Next L
+
+'====================='
+'INNER LOOP 1 ENDS'
+'====================='
+
+
+'=========================================='
+  'WRITE THE RESULTS FROM INNER LOOP 1 FOR TICKER WITH DATA ON LAST ROW'
+'=========================================='
+'Lock down the Total Stock Value for the Ticker with Data on the Last Row of the existing worksheet'
+Cells(N, 13).Value = TotalStockVolume
+'Calculate the Year Price Change for the Ticker with Data on the Last Row of the existing worksheet'
+Cells(N, 11).Value = YearClosePrice - YearOpenPrice
+'NEXT Format the Year Price Change for the Ticker with Data on the Last Row of the existing worksheet'
+    If Cells(N, 11).Value >= 0 Then
+    Cells(N, 11).Interior.ColorIndex = 4
+    Else
+    Cells(N, 11).Interior.ColorIndex = 3
+    End If
+'Next Calculate the Year Percent Change for the Ticker with Data on the Last Row of the existing worksheet'
+If YearOpenPrice > 0 Then
+Cells(N, 12).Value = ((YearClosePrice - YearOpenPrice) / YearOpenPrice)
+Else
+Cells(N, 12).Value = 0
+End If
+'NEXT Format the Year Percent Change'
+Cells(N, 12).NumberFormat = "0.00%"
+
+
+
+
+
+'Set the cursor back to Cell A1 on the existing worksheet'
+Cells(1, 1).Select
+
+'Repeat the OUTER LOOP for the Next Worksheet'
+Next ws
+
+'====================='
+'====================='
+'OUTER LOOP ENDS'
+'====================='
+'====================='
+
+
+
+'=============================================='
+ 'RETURNS YOU TO THE WORKSHEET YOU STARTED ON'
+'=============================================='
+
+'Return to the Worksheet you started on - - the worksheet you identified at the beginning'
+starting_ws.Activate
+
+
+
+End Sub
+
+
+
+
+
+
+
+
+
